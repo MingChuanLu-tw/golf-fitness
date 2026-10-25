@@ -10,7 +10,7 @@
 const TABLES = {
   Sessions:    ['id','date','week','phase','session_id','session_type','status','bp_sys_1','bp_dia_1','bp_sys_2','bp_dia_2','bp_retest_sys','sleep_h','condition','pain_area','pain_score','precheck','step_down','hr_avg','hr_max','duration_min','rpe_session','pain_area_after','pain_score_after','symptom','symptom_at','notes','started_at','finished_at','created_at','updated_at','source'],
   SetLogs:     ['id','session_id','date','session_plan','exercise_id','label','pair','round','side','target_reps','reps','load_kg','rpe','form_breakdown','pain_score','hr_rest','seq','created_at','updated_at','source'],
-  Mobility:    ['id','date','done','sock_pain','created_at','updated_at','source'],
+  Mobility:    ['id','date','done','kind','sock_pain','created_at','updated_at','source'],
   Tests:       ['id','date','week','test_id','side','value','created_at','updated_at','source'],
   Shots:       ['id','datetime','club','ball_speed','club_speed','smash','carry','total','back_spin','side_spin','offline','hla','vla','peak_height','aoa','block','file_name','created_at','updated_at','source'],
   Rounds:      ['id','date','course','score','front9','back9','fairways','gir','putts','late_energy','next_day_pain','created_at','updated_at','source'],

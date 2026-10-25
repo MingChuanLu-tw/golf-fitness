@@ -80,3 +80,5 @@ input.tiny { width: 70px; min-height: 36px; padding: 4px 8px; }
   .exname { font-size: 32px; } .target .big { font-size: 72px; } .timer { font-size: 96px; }
 }
 @media (min-width: 700px) and (orientation: portrait) { .target .big { font-size: 72px; } .timer { font-size: 96px; } }
+
+.timer.prep { color: var(--orange); font-size: 56px; }

@@ -2,7 +2,7 @@ import * as db from "./db.js";
 import * as E from "./engine.js";
 import * as sync from "./sync.js";
 
-export const APP_VERSION = "0.1.0";
+export const APP_VERSION = "0.1.1";
 let P;                       // program.json
 const $ = s => document.querySelector(s);
 const view = () => $("#view");
@@ -63,8 +63,11 @@ async function renderToday() {
   const info = E.dayInfo(P, t, sessions);
   const g = await gates();
   const travel = !!(await db.local("travel"));
-  const mob = (await db.all("Mobility")).filter(m => m.done);
-  const mobToday = mob.find(m => m.date === t);
+  const mobAll = await db.all("Mobility");
+  const mob = mobAll.filter(m => m.done);
+  const mobTodayList = mob.filter(m => m.date === t).sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
+  const sockRow = mobAll.find(m => m.id === "mob:" + t);
+  const lastManual = [...mobTodayList].reverse().find(m => m.kind === "自行完成");
   const isWeekend = ["六", "日"].includes(E.weekday(t));
   const owned = (await db.pref("equipment")) || {};
   let html = header("今日");
@@ -73,7 +76,7 @@ async function renderToday() {
   else if (info.week >= 1 && info.phase) html += `<div class="wk">第 ${info.week} 週・${esc(info.phase.name)}期・RPE ${info.phase.rpe}</div>`;
   else if (info.week > P.weeks) html += `<div class="wk">16 週計畫已結束</div>`;
   else html += `<div class="wk">計畫尚未開始（第 1 週從 ${P.start_date} 開始）</div>`;
-  if (info.weekStats) html += `<div class="stats"><span>本週訓練 <b>${info.weekStats.count}</b>/3</span><span>活動度 <b>${mob.filter(m => m.date >= info.weekStats.from && m.date <= info.weekStats.to).length}</b>/7</span></div>`;
+  if (info.weekStats) html += `<div class="stats"><span>本週訓練 <b>${info.weekStats.count}</b>/3</span><span>活動度 <b>${new Set(mob.filter(m => m.date >= info.weekStats.from && m.date <= info.weekStats.to).map(m => m.date)).size}</b>/7 天</span></div>`;
   html += `</section>`;
 
   const notes = [];
@@ -108,14 +111,17 @@ async function renderToday() {
       <button class="btn big primary" data-act="start" data-sid="${sid}" data-week="${previewWeek}">開始訓練</button></section>`;
   }
   // 每日活動度
-  html += `<section class="card"><h2>每日 5 分鐘活動度</h2>${mobToday ? `<p class="ok">今天已完成 ✓</p>` : `<div class="row"><button class="btn" data-act="mobility">跟練</button><button class="btn" data-act="mobdone">我已做完</button></div>`}
-    ${E.weekday(t) === "日" ? `<label class="field">週日記錄：坐姿穿襪的下背分數（0–10）<input type="number" id="sock" min="0" max="10" inputmode="numeric" value="${esc(mobToday?.sock_pain ?? "")}"></label>` : ""}</section>`;
+  html += `<section class="card"><h2>每日 5 分鐘活動度</h2>
+    <p>${mobTodayList.length ? `<span class="ok">今天已做 ${mobTodayList.length} 次 ✓</span>` : `<span class="muted">今天還沒做</span>`}<span class="muted">・有空隨時可以再做一次</span></p>
+    <div class="row"><button class="btn" data-act="mobility">跟練</button><button class="btn" data-act="mobdone">我已做完一次</button>
+    ${lastManual ? `<button class="btn" data-act="mobundo">撤銷上一筆</button>` : ""}</div>
+    ${E.weekday(t) === "日" ? `<label class="field">週日記錄：坐姿穿襪的下背分數（0–10）<input type="number" id="sock" min="0" max="10" inputmode="numeric" value="${esc(sockRow?.sock_pain ?? "")}"></label>` : ""}</section>`;
   if (await db.local("active_run")) html = `<a class="note blue" href="#play">有一次訓練還沒做完，點這裡繼續</a>` + html;
   view().innerHTML = html;
   refreshPill();
   $("#pick")?.addEventListener("change", async e => { await db.local("pick_" + t, e.target.value); renderToday(); });
   $("#travel")?.addEventListener("change", async e => { await db.local("travel", e.target.checked); renderToday(); });
-  $("#sock")?.addEventListener("change", async e => saveMobility(t, mobToday, { sock_pain: +e.target.value }));
+  $("#sock")?.addEventListener("change", async e => db.save("Mobility", { ...(sockRow || { id: "mob:" + t, date: t, done: false }), sock_pain: +e.target.value }));
   view().querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", async () => {
     const a = b.dataset.act;
     if (a === "start") {
@@ -124,11 +130,14 @@ async function renderToday() {
       location.hash = "#precheck";
     }
     if (a === "mobility") startRun({ mobility: true });
-    if (a === "mobdone") { await saveMobility(t, mobToday, { done: true }); renderToday(); }
+    if (a === "mobdone") { await addMobility("自行完成"); renderToday(); }
+    if (a === "mobundo" && lastManual) { await db.save("Mobility", { ...lastManual, done: false }); renderToday(); }
   }));
 }
-async function saveMobility(date, existing, patch) {
-  await db.save("Mobility", { ...(existing || { id: "mob:" + date, date, done: false }), ...patch });
+// 每做一次活動度就記一筆（一天可以多次）。舊版每天一筆的 id 是 "mob:日期"，仍然算一次；週日的穿襪分數也存在那一筆。
+async function addMobility(kind) {
+  const t = today();
+  await db.save("Mobility", { id: `mob:${t}:${Date.now()}`, date: t, done: true, kind });
 }
 
 // ---------- 訓練前檢查 ----------
@@ -178,6 +187,8 @@ async function renderPrecheck() {
 
 // ---------- 跟練 ----------
 let run = null, tick = null;
+const PREP_SEC = 5;           // 計時動作按「開始」後的預備秒數
+const fmtSec = s => s >= 60 ? `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}` : String(s);
 async function startRun(o) {
   const g = await gates();
   const week = o.week || Math.max(1, E.weekOf(P, today()));
@@ -210,8 +221,9 @@ async function renderPlay() {
   if (st.kind === "timer") {
     right = `<div class="sec">${esc(st.section)} ${progress}</div><h2 class="exname">${esc(st.label)}${st.side ? "・" + st.side : ""}</h2>
       <p class="cue">${esc(st.note || "")}</p><p class="breath">${esc(ex.breath || "")}</p>
-      <div class="timer" id="cd">${st.seconds}</div>
-      <div class="row"><button class="btn" id="prev">上一個</button><button class="btn" id="pause">暫停</button><button class="btn primary" id="skip">下一個</button></div>`;
+      <div class="timer" id="cd">${fmtSec(st.seconds)}</div>
+      <button class="btn big primary" id="tgo">開始</button>
+      <div class="row"><button class="btn" id="prev">上一個</button><button class="btn" id="skip">下一個</button></div>`;
   } else if (st.kind === "warmupset") {
     right = `<div class="sec">${esc(st.section)} ${progress}・暖身組</div><h2 class="exname">${esc(st.label)}</h2>
       <p class="target">${esc(st.text)}</p><p class="muted">不算在組數裡；感受動作，速度和力量都只用一半。</p>
@@ -222,7 +234,7 @@ async function renderPlay() {
     right = `<div class="sec">${esc(st.section)} ${progress}・目標 RPE ${esc(run.rpeTarget)}</div>
       <h2 class="exname"><span class="pair">${esc(i.pair)}</span>${esc(st.label)}${st.side ? "・" + st.side : ""}</h2>
       <div class="round">第 ${st.round} 輪／共 ${st.rounds} 輪</div>
-      ${st.timedSet ? `<div class="timer" id="cd">${st.seconds}</div><button class="btn" id="tstart">開始計時</button>`
+      ${st.timedSet ? `<div class="timer" id="cd">${fmtSec(st.seconds)}</div><button class="btn primary" id="tstart">開始計時</button>`
                     : `<div class="target"><span class="big">${esc(i.reps)}</span> 下${i.per_side ? "／側" : ""}${i.load ? `<span class="load">${esc(i.load)}</span>` : ""}</div>`}
       ${i.note ? `<p class="note blue">${esc(i.note)}</p>` : ""}
       <p class="cue">${esc(i.cue)}</p><p class="breath">呼吸：${esc(ex.breath || "")}，全程不憋氣</p>
@@ -235,7 +247,7 @@ async function renderPlay() {
       <button class="btn big primary" id="done">完成這組</button>`;
   } else if (st.kind === "rest") {
     right = `<div class="sec">休息 ${progress}</div><h2 class="exname">組間休息</h2>
-      <div class="timer" id="cd">${st.seconds}</div>
+      <div class="timer" id="cd">${fmtSec(st.seconds)}</div>
       ${st.hrGate ? `<p class="note orange">擺盪後要休息到心率 100 以下才做下一組</p>` : ""}
       <label class="field">看 Apple Watch 輸入目前心率（可略過）<input id="hr" type="number" inputmode="numeric"></label>
       <div id="hrmsg"></div>
@@ -256,14 +268,25 @@ async function renderPlay() {
   const go = async d => { clearInterval(tick); run.idx = Math.max(0, run.idx + d); await db.local("active_run", run); renderPlay(); };
   const countdown = (sec, onEnd) => {
     let left = sec, paused = false; const el = $("#cd");
-    const draw = () => el && (el.textContent = left >= 60 ? `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}` : left);
+    const draw = () => el && (el.textContent = fmtSec(left));
     draw(); clearInterval(tick);
     tick = setInterval(() => { if (paused) return; left--; draw(); if (left > 0 && left <= 3) say(String(left)); if (left <= 0) { clearInterval(tick); onEnd(); } }, 1000);
     return { pause: () => (paused = !paused), add: n => { left += n; draw(); } };
   };
+  // 按「開始」後先預備幾秒（語音倒數），讓人有時間離開 iPad、擺好姿勢
+  const prep = onGo => {
+    let left = PREP_SEC; const el = $("#cd");
+    const draw = () => { if (el) { el.classList.add("prep"); el.textContent = `預備 ${left}`; } say(String(left)); };
+    clearInterval(tick); draw();
+    tick = setInterval(() => { left--; if (left > 0) return draw(); clearInterval(tick); el?.classList.remove("prep"); say("開始"); onGo(); }, 1000);
+  };
   if (st.kind === "timer") {
-    const c = countdown(st.seconds, () => go(1));
-    $("#pause").onclick = e => { e.target.textContent = c.pause() ? "繼續" : "暫停"; };
+    let c = null;
+    $("#tgo").onclick = e => {
+      const b = e.currentTarget;
+      if (!c) { b.disabled = true; b.textContent = "預備中…"; prep(() => { c = countdown(st.seconds, () => go(1)); b.disabled = false; b.textContent = "暫停"; b.classList.remove("primary"); }); }
+      else b.textContent = c.pause() ? "繼續" : "暫停";
+    };
     $("#skip").onclick = () => go(1); $("#prev").onclick = () => go(-1);
   }
   if (st.kind === "warmupset") $("#done").onclick = () => go(1);
@@ -284,7 +307,10 @@ async function renderPlay() {
     let rpe = null;
     view().querySelectorAll("[data-rpe]").forEach(b => b.onclick = () => { rpe = +b.dataset.rpe; view().querySelectorAll("[data-rpe]").forEach(x => x.classList.toggle("on", x === b)); if (rpe > P.safety.rpe_cap) say("超過上限，下一組降一級"); });
     view().querySelectorAll("[data-d]").forEach(b => b.onclick = () => { const r = $("#reps"); r.value = Math.max(0, (+r.value || 0) + +b.dataset.d); });
-    if (st.timedSet) $("#tstart").onclick = () => countdown(st.seconds, () => say("時間到"));
+    if (st.timedSet) $("#tstart").onclick = e => {
+      const b = e.currentTarget; b.disabled = true; b.textContent = "預備中…";
+      prep(() => countdown(st.seconds, () => { say("時間到"); b.disabled = false; b.textContent = "重新計時"; }));
+    };
     $("#done").onclick = async () => {
       const i = st.item;
       await db.save("SetLogs", { session_id: run.sessionRecordId, date: today(), session_plan: run.sid, exercise_id: i.ex, label: st.label, pair: i.pair,
@@ -319,8 +345,7 @@ async function finishRun(early = false) {
   const mins = Math.round((Date.now() - r.startedAt) / 60000);
   if (r.mobility && !early) {
     await db.save("Sessions", { ...sess, status: sess.precheck === "mobility" ? "只做活動度" : "完成", duration_min: mins, finished_at: db.nowISO() });
-    const ex = (await db.all("Mobility")).find(m => m.date === today());
-    await saveMobility(today(), ex, { done: true });
+    await addMobility("跟練");
     await db.local("active_run", null); run = null; location.hash = "#today"; return;
   }
   view().innerHTML = header("訓練結束") + `<section class="card">
@@ -338,7 +363,7 @@ async function finishRun(early = false) {
     const pa = [...document.querySelectorAll("input[name=pa]:checked")].map(x => x.value);
     await db.save("Sessions", { ...sess, status: early ? "部分" : "完成", hr_avg: n("#hra"), hr_max: n("#hrm"), duration_min: n("#dur"), rpe_session: n("#rpes"),
       pain_area_after: pa.join("、"), pain_score_after: n("#ps"), notes: $("#notes").value, finished_at: db.nowISO() });
-    if (r.idx > 7) await saveMobility(today(), (await db.all("Mobility")).find(m => m.date === today()), { done: true });   // 熱身就是每日活動度
+    if (r.idx > 7) await addMobility("訓練熱身");   // 熱身就是每日活動度，算一次
     if (n("#hrm") > P.safety.hr_max) alertBox(`最高心率 ${n("#hrm")} 超過 ${P.safety.hr_max}。下次組間休息延長到 120 秒；還是超過就每組減 2 下。`);
     await db.local("active_run", null); run = null;
     location.hash = "#today";
