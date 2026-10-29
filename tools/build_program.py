@@ -172,7 +172,7 @@ def step(ex, sec, note="", side=False):
     return dict(ex=ex, label=EX[ex]["name"], seconds=sec, note=note, per_side=side)
 
 program = {
-  "version": "2026-10-24.1",
+  "version": "2026-10-29.1",
   "source": "docs/plan.md（Claude Docs 計畫書 rev 67 匯出）",
   "week0_start": "2026-10-22",
   "start_date": "2026-10-26",
@@ -203,6 +203,12 @@ program = {
       "球桿 hip hinge 2 × 10，三點都不離桿",
       "6kg 羅馬尼亞硬舉 3 × 12，RPE ≤5 而且不痛（第 4 週課表 B 測）"]}},
   "special_days": {
+    "2026-11-16":{"type":"note","text":"第 4 週：11/21（六）幸福球場下場。本週做課表 A（11/16）、B（11/18，含硬舉 3 × 12 測試）；課表 C 取消、不補課"},
+    "2026-11-19":{"type":"note","text":"11/21 下場週：模擬器正常練習，速度區塊只做 1 組"},
+    "2026-11-20":{"type":"mobility_only","text":"下場前 1 天：只做每日活動度；可以在模擬器輕鬆打 30 球"},
+    "2026-11-21":{"type":"round","text":"幸福球場下場日：下場前 10 分鐘熱身；回來後記錄成績"},
+    "2026-11-22":{"type":"recovery","text":"下場隔天：快走 20 分鐘＋活動度，記錄下場成績和身體狀況；記得記錄坐姿穿襪分數"},
+    "2026-11-23":{"type":"note","text":"今天先做第 4 週複測（「測試」頁），下一次課再開始第二期"},
     "2026-12-21":{"type":"taper_minus1","text":"下場前 6 或 5 天（擇一天）：正常課表，但每個動作少 1 組"},
     "2026-12-22":{"type":"taper_minus1","text":"下場前 6 或 5 天（擇一天）：正常課表，但每個動作少 1 組"},
     "2026-12-23":{"type":"mobility_walk","text":"下場前 4 天：活動度＋快走"},
@@ -223,6 +229,7 @@ program = {
   },
   "holiday": {"from":"2027-02-04","to":"2027-02-10","text":"春節連假：改做出差徒手版，或把第四期課表做 2 次"},
   "retest_weeks": [0,4,8,12,16],
+  "retest_moved": {"4": {"date":"2026-11-23","text":"第 4 週複測因 11/21 下場，改在 11/23（一）做"}},
   "tests": {
     "mobility": [
       {"id":"pelvic_tilt","name":"骨盆前後傾","how":"擺好擊球站姿，雙手抱胸，只讓骨盆前後傾，上半身不動","type":"choice","options":["順暢","卡卡","做不到"],"video":YT+"H2LJrdWwHgs"},

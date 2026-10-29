@@ -2,7 +2,7 @@ import * as db from "./db.js";
 import * as E from "./engine.js";
 import * as sync from "./sync.js";
 
-export const APP_VERSION = "0.1.1";
+export const APP_VERSION = "0.1.2";
 let P;                       // program.json
 const $ = s => document.querySelector(s);
 const view = () => $("#view");
@@ -81,7 +81,8 @@ async function renderToday() {
 
   const notes = [];
   if (info.week === 0) notes.push(`<a href="#tests" class="note blue">第 0 週：請完成基準測試（活動度篩檢 12 項＋體能測試）</a>`);
-  if (info.retest && info.week > 0) notes.push(`<a href="#tests" class="note blue">第 ${info.week} 週是複測週：週末做複測</a>`);
+  const moved = P.retest_moved?.[info.week];
+  if (info.retest && info.week > 0) notes.push(`<a href="#tests" class="note blue">${moved ? esc(moved.text) : `第 ${info.week} 週是複測週：週末做複測`}</a>`);
   if (info.special) notes.push(`<div class="note orange">${esc(info.special.text)}</div>`);
   if (info.holiday) notes.push(`<div class="note orange">${esc(info.holiday.text)}</div>`);
   if (info.restAdvice && !info.special) notes.push(`<div class="note">${esc(info.restAdvice)}</div>`);
