@@ -90,6 +90,12 @@ export function toSteps(P, built, opt = {}) {
     else steps.push({ kind: "timer", section, ex: s.ex, label: s.label, seconds: s.seconds, note: s.note });
   });
   timed(P.warmup, "熱身");
+  // 平衡（每日活動度第 6 項）：依目前階段，做完問一次是否達標
+  const bal = P.balance?.stages.find(s => s.stage === (opt.balanceStage || 1));
+  if (bal) {
+    timed(bal.steps, `平衡・第 ${bal.stage} 階段`);
+    steps.push({ kind: "balancecheck", section: `平衡・第 ${bal.stage} 階段`, ex: bal.steps[0].ex, label: "平衡達標了嗎？", stage: bal.stage, pass: bal.pass });
+  }
   if (opt.mobilityOnly) { timed([P.weekend_walk].map(w => ({ ...w, seconds: 300, note: "慢走 5 分鐘" })), "慢走"); return steps; }
   // 依 pair 的字首分組：A1/A2 → A，1a/1b/1c → 1，「先做」單獨一組
   const groups = [];

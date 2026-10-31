@@ -18,6 +18,11 @@ EX = {
   "ham_strap":      dict(name="仰躺彈力繩拉腿後側", video=YT+"Il1L75v6gq0", breath="持續呼吸"),
   "childs_pose":    dict(name="嬰兒式", video=YT+"-dZXkwzSzF4", breath="慢慢吐氣放鬆"),
   "walk":           dict(name="慢走", video=None, breath="自然呼吸"),
+  # 平衡（每日活動度第 6 項）
+  "bal_floor_ec":   dict(name="閉眼單腳站", video=YT+"4HtOeds_vyw", breath="自然呼吸，不憋氣"),
+  "bal_bs_2leg":    dict(name="Balance Station 雙腳站", video=YT+"2oHO1W5zgDk", breath="自然呼吸，不憋氣"),
+  "bal_bs_1leg":    dict(name="Balance Station 單腳站", video=YT+"8fAlc2giBao", breath="自然呼吸，不憋氣"),
+  "bal_bs_golf":    dict(name="Balance Station 擊球站姿轉身", video=YT+"2oHO1W5zgDk", breath="轉身時吐氣，回來時吸氣"),
   "brisk_walk":     dict(name="快走", video=None, breath="自然呼吸，心率 ≤120"),
   # 核心與抗旋轉
   "dead_bug":       dict(name="死蟲式", video=YT+"g_BYB0R-4Ws", breath="伸手腳時吐氣"),
@@ -113,7 +118,7 @@ SESSIONS = {
   "P2-B": [
     it("A1","sl_rdl","8","骨盆保持水平","手扶牆","8kg",side=True,load="6kg",label="單腳羅馬尼亞硬舉 6kg"),
     it("A2","band_press","12","推出時吐氣，身體不前傾","換輕的繩","單手"),
-    it("B1","rev_lunge","8","前膝對齊腳尖","徒手","8–10kg",side=True,load="6kg",label="後退弓箭步 6kg"),
+    it("B1","rev_lunge","8","前膝對齊腳尖","徒手","8–10kg，或前腳踩在 Balance Station 半球上（平衡第 3 階段通過後）",side=True,load="6kg",label="後退弓箭步 6kg"),
     it("B2","face_pull","15","拉到臉前、手肘外開，拉時吐氣","換輕的繩","停頓 2 秒"),
     it("C1","pallof_walk","6 步","手推出後側向小步移動，身體不被拉轉","原地版","換重的繩",side=True),
     it("C2","sl_bridge","10","頂起時吐氣","雙腳橋","腳放在沙發上",side=True),
@@ -172,8 +177,8 @@ def step(ex, sec, note="", side=False):
     return dict(ex=ex, label=EX[ex]["name"], seconds=sec, note=note, per_side=side)
 
 program = {
-  "version": "2026-10-29.1",
-  "source": "docs/plan.md（Claude Docs 計畫書 rev 67 匯出）",
+  "version": "2026-10-31.1",
+  "source": "docs/plan.md（Claude Docs 計畫書 rev 77）",
   "week0_start": "2026-10-22",
   "start_date": "2026-10-26",
   "weeks": 16,
@@ -198,6 +203,18 @@ program = {
   "cooldown": [step("ham_strap",45,"左右各 45 秒",True), step("childs_pose",30,"做完下背分數變高，改成俯臥休息或站姿輕微後仰"),
                step("walk",60,"起身前先坐 3 秒")],
   "weekend_walk": step("brisk_walk",600,"週末課：收操前快走 10 分鐘"),
+  "balance": {
+    "rule": "連續 2 次達到升級條件就升一級；頭暈或腳踝、膝蓋不舒服就退回上一階段",
+    "safety": "站在牆角或椅背旁，伸手就扶得到；上下 Balance Station 先扶牆；頭暈就停",
+    "stages": [
+      {"stage":1, "steps":[step("bal_floor_ec",30,"地板上閉眼單腳站；腳落地就重新計時，累積到 30 秒",True)],
+       "pass":"左右每次都能連續站 15 秒以上"},
+      {"stage":2, "steps":[step("bal_bs_2leg",60,"半球朝上，雙腳站在中間：前 30 秒睜眼，後 30 秒閉眼")],
+       "pass":"閉眼能站滿 30 秒不扶"},
+      {"stage":3, "steps":[step("bal_bs_1leg",30,"半球朝上，單腳站在中央，睜眼",True)],
+       "pass":"左右都能站滿 30 秒不扶"},
+      {"stage":4, "steps":[step("bal_bs_golf",60,"半球朝上，擊球站姿（膝微彎、上身前傾、雙手抱胸），慢速上桿轉身 10 下")],
+       "pass":"下盤不晃（最後一階段，維持即可）"}]},
   "gates": {"kb12": {"name":"12kg 進入條件","criteria":[
       "坐姿穿襪的下背痛 ≤1/10，連續 2 週（每週日記錄）",
       "球桿 hip hinge 2 × 10，三點都不離桿",
@@ -237,7 +254,7 @@ program = {
       {"id":"t_rot","name":"胸椎旋轉","how":"坐椅子、雙腳併攏、鐵桿橫放在胸前，骨盆不動轉身，看桿子對到地上的哪條線","type":"choice","sides":True,"options":["<45°","約 45°",">45°"],"video":YT+"KDq-oykm89U"},
       {"id":"neck_rot","name":"頸椎旋轉","how":"坐直，下巴往肩膀轉","type":"choice","sides":True,"options":["碰到","差一指","差兩指以上"]},
       {"id":"hip_ir","name":"髖內旋","how":"坐椅子、膝蓋 90°，大腿不動，小腿往外擺","type":"choice","sides":True,"options":["<30°","30–45°",">45°"],"video":YT+"hWpJ2fY6QqQ"},
-      {"id":"sl_balance","name":"單腳平衡（閉眼）","how":"雙手叉腰、閉眼單腳站，最多 30 秒","type":"number","sides":True,"unit":"秒"},
+      {"id":"sl_balance","name":"單腳平衡（閉眼）","how":"雙手叉腰、閉眼單腳站，最多 30 秒","type":"number","sides":True,"unit":"秒","video":YT+"4HtOeds_vyw"},
       {"id":"bridge_ext","name":"橋式伸腿","how":"躺姿橋式撐起後，一腳伸直，維持 10 秒","type":"choice","sides":True,"options":["骨盆不掉","會掉"],"video":"https://www.mytpi.com/articles/screening/the-bridge-with-leg-extension-test"},
       {"id":"er_9090","name":"90/90 肩外旋","how":"擊球站姿，右手臂抬到 90° 並往後轉，對鏡子看前臂能否和脊椎平行","type":"choice","options":["能","不能"],"video":YT+"O6UUmv6y0KQ"},
       {"id":"lat","name":"背闊肌","how":"背貼牆、下背貼牆，前臂併攏往上舉；碰到牆填 0","type":"number","unit":"cm（離牆）"},

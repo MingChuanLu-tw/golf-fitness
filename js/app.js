@@ -2,7 +2,7 @@ import * as db from "./db.js";
 import * as E from "./engine.js";
 import * as sync from "./sync.js";
 
-export const APP_VERSION = "0.1.2";
+export const APP_VERSION = "0.1.3";
 let P;                       // program.json
 const $ = s => document.querySelector(s);
 const view = () => $("#view");
@@ -70,6 +70,7 @@ async function renderToday() {
   const lastManual = [...mobTodayList].reverse().find(m => m.kind === "自行完成");
   const isWeekend = ["六", "日"].includes(E.weekday(t));
   const owned = (await db.pref("equipment")) || {};
+  const bal = await balanceState();
   let html = header("今日");
   html += `<section class="hero"><div class="date">${t.slice(5).replace("-", "/")}（${E.weekday(t)}）</div>`;
   if (info.week === 0) html += `<div class="wk">第 0 週・基準測試</div>`;
@@ -112,16 +113,20 @@ async function renderToday() {
       <button class="btn big primary" data-act="start" data-sid="${sid}" data-week="${previewWeek}">開始訓練</button></section>`;
   }
   // 每日活動度
-  html += `<section class="card"><h2>每日 5 分鐘活動度</h2>
+  html += `<section class="card"><h2>每日 5 分鐘活動度＋1 分鐘平衡</h2>
     <p>${mobTodayList.length ? `<span class="ok">今天已做 ${mobTodayList.length} 次 ✓</span>` : `<span class="muted">今天還沒做</span>`}<span class="muted">・有空隨時可以再做一次</span></p>
     <div class="row"><button class="btn" data-act="mobility">跟練</button><button class="btn" data-act="mobdone">我已做完一次</button>
     ${lastManual ? `<button class="btn" data-act="mobundo">撤銷上一筆</button>` : ""}</div>
+    <div class="field">平衡（第 6 項）：<select id="balstage">${P.balance.stages.map(x => `<option value="${x.stage}" ${x.stage === bal.stage ? "selected" : ""}>第 ${x.stage} 階段・${esc(P.exercises[x.steps[0].ex].name)}</option>`).join("")}</select>
+      <small>升級條件：${esc(bal.def.pass)}。${esc(P.balance.rule)}</small></div>
+    ${bal.eligible ? `<div class="note green">平衡第 ${bal.stage} 階段已連續 2 次達標，可以升到第 ${bal.stage + 1} 階段。<button class="btn" data-act="balup">升到第 ${bal.stage + 1} 階段</button></div>` : ""}
     ${E.weekday(t) === "日" ? `<label class="field">週日記錄：坐姿穿襪的下背分數（0–10）<input type="number" id="sock" min="0" max="10" inputmode="numeric" value="${esc(sockRow?.sock_pain ?? "")}"></label>` : ""}</section>`;
   if (await db.local("active_run")) html = `<a class="note blue" href="#play">有一次訓練還沒做完，點這裡繼續</a>` + html;
   view().innerHTML = html;
   refreshPill();
   $("#pick")?.addEventListener("change", async e => { await db.local("pick_" + t, e.target.value); renderToday(); });
   $("#travel")?.addEventListener("change", async e => { await db.local("travel", e.target.checked); renderToday(); });
+  $("#balstage")?.addEventListener("change", async e => { await db.pref("balance_stage", +e.target.value); renderToday(); });
   $("#sock")?.addEventListener("change", async e => db.save("Mobility", { ...(sockRow || { id: "mob:" + t, date: t, done: false }), sock_pain: +e.target.value }));
   view().querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", async () => {
     const a = b.dataset.act;
@@ -132,8 +137,18 @@ async function renderToday() {
     }
     if (a === "mobility") startRun({ mobility: true });
     if (a === "mobdone") { await addMobility("自行完成"); renderToday(); }
+    if (a === "balup") { await db.pref("balance_stage", bal.stage + 1); renderToday(); }
     if (a === "mobundo" && lastManual) { await db.save("Mobility", { ...lastManual, done: false }); renderToday(); }
   }));
+}
+// 平衡階段：目前階段、紀錄、是否可以升級（同一階段最近 2 次都達標）
+async function balanceState() {
+  const stage = (await db.pref("balance_stage")) || 1;
+  const log = (await db.pref("balance_log")) || [];
+  const def = P.balance.stages.find(x => x.stage === stage) || P.balance.stages[0];
+  const cur = log.filter(x => x.stage === stage);
+  const eligible = stage < P.balance.stages.length && cur.length >= 2 && cur.slice(-2).every(x => x.ok);
+  return { stage, log, def, eligible };
 }
 // 每做一次活動度就記一筆（一天可以多次）。舊版每天一筆的 id 是 "mob:日期"，仍然算一次；週日的穿襪分數也存在那一筆。
 async function addMobility(kind) {
@@ -194,14 +209,16 @@ async function startRun(o) {
   const g = await gates();
   const week = o.week || Math.max(1, E.weekOf(P, today()));
   let steps, built = null, sid = o.sid;
-  if (o.mobility) { steps = E.toSteps(P, null, { mobilityOnly: true }); sid = sid || null; }
+  const balanceStage = (await balanceState()).stage;
+  if (o.mobility) { steps = E.toSteps(P, null, { mobilityOnly: true, balanceStage }); sid = sid || null; }
   else { built = E.buildSession(P, sid, week, { gates: g, travel: o.travel, stepDown: o.stepDown, taperMinus1: o.taperMinus1, taperSession: o.taperSession });
-         steps = E.toSteps(P, built, { weekend: o.weekend }); }
+         steps = E.toSteps(P, built, { weekend: o.weekend, balanceStage }); }
   const phase = E.phaseOf(P, week);
   const sess = await db.save("Sessions", { date: today(), week, phase: phase?.id ?? null, session_id: o.mobility ? null : sid,
     session_type: o.mobility ? (o.precheck ? "只做活動度" : "活動度") : (o.travel ? "出差" : o.weekend ? "週末課" : o.taperMinus1 || o.taperSession ? "減量" : sid.split("-")[1] || sid),
     status: "進行中", started_at: db.nowISO(), step_down: !!o.stepDown, ...(o.precheck || {}) });
-  run = { sessionRecordId: sess.id, sid, week, steps, idx: 0, mobility: !!o.mobility, rpeTarget: built?.rpeTarget, startedAt: Date.now(), setsDone: 0 };
+  run = { sessionRecordId: sess.id, sid, week, steps, idx: 0, mobility: !!o.mobility, rpeTarget: built?.rpeTarget, startedAt: Date.now(), setsDone: 0,
+    warmupLen: steps.filter(x => x.section === "熱身" || String(x.section).startsWith("平衡")).length };
   await db.local("active_run", run);
   await db.local("pending_start", null);
   location.hash = "#play";
@@ -225,6 +242,10 @@ async function renderPlay() {
       <div class="timer" id="cd">${fmtSec(st.seconds)}</div>
       <button class="btn big primary" id="tgo">開始</button>
       <div class="row"><button class="btn" id="prev">上一個</button><button class="btn" id="skip">下一個</button></div>`;
+  } else if (st.kind === "balancecheck") {
+    right = `<div class="sec">${esc(st.section)} ${progress}</div><h2 class="exname">${esc(st.label)}</h2>
+      <p class="target">升級條件：${esc(st.pass)}</p><p class="muted">${esc(P.balance.rule)}</p>
+      <div class="row"><button class="btn big primary" id="balok">達標</button><button class="btn big" id="balno">還沒</button></div>`;
   } else if (st.kind === "warmupset") {
     right = `<div class="sec">${esc(st.section)} ${progress}・暖身組</div><h2 class="exname">${esc(st.label)}</h2>
       <p class="target">${esc(st.text)}</p><p class="muted">不算在組數裡；感受動作，速度和力量都只用一半。</p>
@@ -291,6 +312,10 @@ async function renderPlay() {
     $("#skip").onclick = () => go(1); $("#prev").onclick = () => go(-1);
   }
   if (st.kind === "warmupset") $("#done").onclick = () => go(1);
+  if (st.kind === "balancecheck") {
+    const mark = async ok => { const log = (await db.pref("balance_log")) || []; log.push({ date: today(), stage: st.stage, ok }); await db.pref("balance_log", log.slice(-60)); go(1); };
+    $("#balok").onclick = () => mark(true); $("#balno").onclick = () => mark(false);
+  }
   if (st.kind === "rest") {
     let hrHold = st.hrGate;
     const c = countdown(st.seconds, () => { if (!hrHold) go(1); else { say("輸入心率，100 以下再繼續"); } });
@@ -364,7 +389,7 @@ async function finishRun(early = false) {
     const pa = [...document.querySelectorAll("input[name=pa]:checked")].map(x => x.value);
     await db.save("Sessions", { ...sess, status: early ? "部分" : "完成", hr_avg: n("#hra"), hr_max: n("#hrm"), duration_min: n("#dur"), rpe_session: n("#rpes"),
       pain_area_after: pa.join("、"), pain_score_after: n("#ps"), notes: $("#notes").value, finished_at: db.nowISO() });
-    if (r.idx > 7) await addMobility("訓練熱身");   // 熱身就是每日活動度，算一次
+    if (r.idx >= (r.warmupLen || 8)) await addMobility("訓練熱身");   // 熱身就是每日活動度，算一次
     if (n("#hrm") > P.safety.hr_max) alertBox(`最高心率 ${n("#hrm")} 超過 ${P.safety.hr_max}。下次組間休息延長到 120 秒；還是超過就每組減 2 下。`);
     await db.local("active_run", null); run = null;
     location.hash = "#today";

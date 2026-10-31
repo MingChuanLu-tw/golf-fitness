@@ -1,6 +1,6 @@
 {
- "version": "2026-10-29.1",
- "source": "docs/plan.md（Claude Docs 計畫書 rev 67 匯出）",
+ "version": "2026-10-31.1",
+ "source": "docs/plan.md（Claude Docs 計畫書 rev 77）",
  "week0_start": "2026-10-22",
  "start_date": "2026-10-26",
  "weeks": 16,
@@ -389,7 +389,7 @@
     "reps": "8",
     "cue": "前膝對齊腳尖",
     "regress": "徒手",
-    "progress": "8–10kg",
+    "progress": "8–10kg，或前腳踩在 Balance Station 半球上（平衡第 3 階段通過後）",
     "per_side": true,
     "load": "6kg"
    },
@@ -897,6 +897,64 @@
   "note": "週末課：收操前快走 10 分鐘",
   "per_side": false
  },
+ "balance": {
+  "rule": "連續 2 次達到升級條件就升一級；頭暈或腳踝、膝蓋不舒服就退回上一階段",
+  "safety": "站在牆角或椅背旁，伸手就扶得到；上下 Balance Station 先扶牆；頭暈就停",
+  "stages": [
+   {
+    "stage": 1,
+    "steps": [
+     {
+      "ex": "bal_floor_ec",
+      "label": "閉眼單腳站",
+      "seconds": 30,
+      "note": "地板上閉眼單腳站；腳落地就重新計時，累積到 30 秒",
+      "per_side": true
+     }
+    ],
+    "pass": "左右每次都能連續站 15 秒以上"
+   },
+   {
+    "stage": 2,
+    "steps": [
+     {
+      "ex": "bal_bs_2leg",
+      "label": "Balance Station 雙腳站",
+      "seconds": 60,
+      "note": "半球朝上，雙腳站在中間：前 30 秒睜眼，後 30 秒閉眼",
+      "per_side": false
+     }
+    ],
+    "pass": "閉眼能站滿 30 秒不扶"
+   },
+   {
+    "stage": 3,
+    "steps": [
+     {
+      "ex": "bal_bs_1leg",
+      "label": "Balance Station 單腳站",
+      "seconds": 30,
+      "note": "半球朝上，單腳站在中央，睜眼",
+      "per_side": true
+     }
+    ],
+    "pass": "左右都能站滿 30 秒不扶"
+   },
+   {
+    "stage": 4,
+    "steps": [
+     {
+      "ex": "bal_bs_golf",
+      "label": "Balance Station 擊球站姿轉身",
+      "seconds": 60,
+      "note": "半球朝上，擊球站姿（膝微彎、上身前傾、雙手抱胸），慢速上桿轉身 10 下",
+      "per_side": false
+     }
+    ],
+    "pass": "下盤不晃（最後一階段，維持即可）"
+   }
+  ]
+ },
  "gates": {
   "kb12": {
    "name": "12kg 進入條件",
@@ -1088,7 +1146,8 @@
     "how": "雙手叉腰、閉眼單腳站，最多 30 秒",
     "type": "number",
     "sides": true,
-    "unit": "秒"
+    "unit": "秒",
+    "video": "https://www.youtube.com/watch?v=4HtOeds_vyw"
    },
    {
     "id": "bridge_ext",
@@ -1303,6 +1362,26 @@
    "name": "慢走",
    "video": null,
    "breath": "自然呼吸"
+  },
+  "bal_floor_ec": {
+   "name": "閉眼單腳站",
+   "video": "https://www.youtube.com/watch?v=4HtOeds_vyw",
+   "breath": "自然呼吸，不憋氣"
+  },
+  "bal_bs_2leg": {
+   "name": "Balance Station 雙腳站",
+   "video": "https://www.youtube.com/watch?v=2oHO1W5zgDk",
+   "breath": "自然呼吸，不憋氣"
+  },
+  "bal_bs_1leg": {
+   "name": "Balance Station 單腳站",
+   "video": "https://www.youtube.com/watch?v=8fAlc2giBao",
+   "breath": "自然呼吸，不憋氣"
+  },
+  "bal_bs_golf": {
+   "name": "Balance Station 擊球站姿轉身",
+   "video": "https://www.youtube.com/watch?v=2oHO1W5zgDk",
+   "breath": "轉身時吐氣，回來時吸氣"
   },
   "brisk_walk": {
    "name": "快走",

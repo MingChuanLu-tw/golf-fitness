@@ -1,5 +1,5 @@
 // 離線快取。修改任何檔案（包括 program.json）後，把 VERSION 加 1，裝置就會出現「有新版本」。
-const VERSION = "gf-v3";
+const VERSION = "gf-v4";
 const FILES = ["./", "index.html", "styles.css", "program.json", "manifest.webmanifest",
   "js/app.js", "js/db.js", "js/engine.js", "js/sync.js", "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png"];
 
