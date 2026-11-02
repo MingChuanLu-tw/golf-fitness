@@ -46,7 +46,7 @@
 - [ ] 用哪個 Google 帳號
 - [ ] iPad、iPhone 型號與 iOS 版本
 - [ ] 模擬器 PC 的 Windows 版本、GSPro 版本
-- [ ] 一份 GSPro 匯出的 CSV
+- [x] 一份 GSPro 匯出的 CSV（2026-11-02 收到，欄位見下方進度紀錄）
 - [ ] 上傳程式要開機自動執行或手動啟動
 - [ ] 是否把「Claude 遠端讀取模擬器 PC」列入第二版
 
@@ -59,3 +59,4 @@
 - 2026-10-25　v0.1.1 依實測修正：計時步驟（熱身、活動度、收操、計時組）切換後不再自動倒數，按「開始」後預備 5 秒再計時，左右側各按一次；每日活動度一天可記錄多次（跟練、手動、訓練熱身各算一次，可撤銷手動那筆），本週統計仍以天數計。瀏覽器自動測試通過。
 - 2026-10-29　v0.1.2：計畫書加入 11/21（六）幸福球場下場（claude.ai 正本與 docs/plan.md 同步修改）：第 4 週課表 C 取消、11/19 速度區塊 1 組、11/20 只做活動度、11/22 恢復、第 4 週複測改到 11/23；program.json 加入對應的特殊日與複測改期提示。check_program 全部一致，瀏覽器檢查 11/16–11/23 的「今日」頁提示正確。
 - 2026-10-31　v0.1.3：計畫書加入 Balance Station 平衡訓練（claude.ai 正本 rev 77 與 docs/plan.md 同步）：每日活動度第 6 項平衡 4 階段、第十一節升級規則、課表 B 弓箭步進階、第 4 週複測加閉眼單腳站、影片庫 3 支。網頁：跟練加平衡步驟與達標確認、今日頁顯示階段與升級提示、訓練課熱身也含平衡。check_program 全部一致（49 支影片），瀏覽器測試升級流程通過。
+- 2026-11-02　收到 GSPro「Export CSV to Desktop」樣本（M3 用）。欄位：Carry, TotalDistance, BallSpeed, BackSpin, SideSpin, HLA, VLA, Decent, DistanceToPin（含單位文字，如「21.06 yds」「13.24 ft」）, PeakHeight, Offline, rawSpinAxis, rawCarryGame, rawCarryLM, Club（H3、H5…，依 GSPro 選的球桿）, ClubSpeed, Path, AoA, FaceToTarget, FaceToPath, Lie, Loft, DynamicLoft, CR, HI, VI, SmashFactor。注意：沒有逐球時間欄，日期要取自檔名（gspro-export月-日-年-時-分-秒.csv）；SmashFactor 多半是 0，要用 BallSpeed ÷ ClubSpeed 自己算；HI／VI 疑似擊球點位置，待確認單位。樣本不放進 repo。
