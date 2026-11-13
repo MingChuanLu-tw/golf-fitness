@@ -1,0 +1,248 @@
+{
+  "version": "2026-11-13",
+  "source": "docs/plan.md 熱身計畫書 v0.1",
+  "safety": {
+    "breath_rule": "用力時吐氣，回到起點時吸氣，全程不憋氣",
+    "stop_rules": [
+      "心悸、心跳不規則、胸悶、頭暈、異常喘、冒冷汗：立即停止並坐下",
+      "胸痛或快要昏倒：直接打 119",
+      "其他症狀：先用 Apple Watch 錄 ECG，不緩解就立刻就醫"
+    ],
+    "pain_rule": "下背痛 ≥4/10，或痛往腿延伸、麻木：停止那個動作",
+    "emergency_tel": "119",
+    "sim_ball_cap": {
+      "sock_pain_min": 3,
+      "balls": 80
+    }
+  },
+  "timing": {
+    "prep_s": 5,
+    "switch_s": 3
+  },
+  "routines": {
+    "sim": {
+      "name": "模擬器擊球前",
+      "where": "模擬器房",
+      "steps": [
+        {
+          "ex": "standing_open_book",
+          "qty": "左右各 5 下",
+          "per_side": true,
+          "seconds": 20,
+          "source": "取代第十節的開書式（側躺）"
+        },
+        {
+          "ex": "dowel_hinge",
+          "qty": "10 下",
+          "per_side": false,
+          "seconds": 40,
+          "source": "第十節"
+        },
+        {
+          "ex": "club_turn",
+          "qty": "左右各 10 下",
+          "per_side": true,
+          "seconds": 20,
+          "source": "第十節"
+        },
+        {
+          "ex": "trunk_turn",
+          "qty": "左右各 10 下",
+          "per_side": true,
+          "seconds": 20,
+          "source": "第十節（無固定點的替代）；做法 🆕 由我補"
+        },
+        {
+          "ex": "overhead_sidebend",
+          "qty": "左右各 5 下",
+          "per_side": true,
+          "seconds": 20,
+          "source": "計畫書沒有"
+        },
+        {
+          "ex": "hip_rotation",
+          "qty": "左右各 5 下",
+          "per_side": true,
+          "seconds": 20,
+          "source": "計畫書沒有"
+        },
+        {
+          "ex": "practice_swing",
+          "qty": "10 下",
+          "per_side": false,
+          "seconds": 60,
+          "source": "第十節"
+        }
+      ],
+      "finish": [
+        {
+          "label": "先打 5 球切桿，再開始正式練習",
+          "qty": "5 球",
+          "source": "第十節；第二節"
+        }
+      ],
+      "finish_ball_cap": true
+    },
+    "round": {
+      "name": "下場前",
+      "where": "球場",
+      "steps": [
+        {
+          "ex": "standing_open_book",
+          "qty": "左右各 5 下",
+          "per_side": true,
+          "seconds": 20,
+          "source": "取代第十節的開書式"
+        },
+        {
+          "ex": "dowel_hinge",
+          "qty": "10 下",
+          "per_side": false,
+          "seconds": 40,
+          "source": "第十節"
+        },
+        {
+          "ex": "club_turn",
+          "qty": "左右各 10 下",
+          "per_side": true,
+          "seconds": 20,
+          "source": "第十節"
+        },
+        {
+          "ex": "trunk_turn",
+          "qty": "左右各 10 下",
+          "per_side": true,
+          "seconds": 20,
+          "source": "第十節"
+        },
+        {
+          "ex": "overhead_sidebend",
+          "qty": "左右各 5 下",
+          "per_side": true,
+          "seconds": 20,
+          "source": "計畫書沒有"
+        },
+        {
+          "ex": "hip_rotation",
+          "qty": "左右各 5 下",
+          "per_side": true,
+          "seconds": 20,
+          "source": "計畫書沒有"
+        },
+        {
+          "ex": "practice_swing",
+          "qty": "20 下",
+          "per_side": false,
+          "seconds": 120,
+          "source": "第十節 10 下；🆕 加到 20 下"
+        },
+        {
+          "ex": "walking_lunge",
+          "qty": "20 步",
+          "per_side": false,
+          "seconds": 60,
+          "source": "第十節 10 步；🆕 加到 20 步"
+        },
+        {
+          "ex": "side_step",
+          "qty": "左右各 20 步",
+          "per_side": true,
+          "seconds": 30,
+          "source": "第十節 10 步；🆕 加到 20 步"
+        },
+        {
+          "ex": "pogo",
+          "qty": "20 秒",
+          "per_side": false,
+          "seconds": 20,
+          "source": "第十節"
+        }
+      ],
+      "finish": [],
+      "finish_ball_cap": false
+    }
+  },
+  "exercises": {
+    "standing_open_book": {
+      "name": "站姿開書式",
+      "new": true,
+      "cue": "雙腳與肩同寬、膝蓋微彎，雙手在胸前伸直合掌；一手往後打開，眼睛跟著手，骨盆不動",
+      "breath": "轉開時吐氣",
+      "video": "https://www.youtube.com/watch?v=qIFcsrA7c5Y",
+      "video_note": ""
+    },
+    "dowel_hinge": {
+      "name": "球桿 hip hinge",
+      "new": false,
+      "cue": "後腦、上背、尾椎三點不離桿",
+      "breath": "起身時吐氣",
+      "video": "https://www.youtube.com/watch?v=PG67O49Hsso",
+      "video_note": "體能計畫書影片庫的影片"
+    },
+    "club_turn": {
+      "name": "持桿擊球姿勢轉身",
+      "new": false,
+      "cue": "雙手持桿橫放在肩後，擺好擊球姿勢；維持前傾角，轉的是胸椎不是腰",
+      "breath": "轉時吐氣",
+      "video": "https://www.youtube.com/shorts/EkBb5GQULUE",
+      "video_note": "Shorts 短片；球桿放在肩上轉身"
+    },
+    "trunk_turn": {
+      "name": "徒手轉體",
+      "new": false,
+      "cue": "擊球姿勢、雙手交叉抱胸；骨盆不動",
+      "breath": "轉時吐氣",
+      "video": "https://www.youtube.com/watch?v=UUf4lRUf1FY",
+      "video_note": "手的位置可能和「雙手交叉抱胸」不同"
+    },
+    "overhead_sidebend": {
+      "name": "持桿過頂側彎",
+      "new": true,
+      "cue": "雙手握住球桿兩端，舉到頭上，手臂打直；往一側慢慢側彎，停 2 秒再回正",
+      "breath": "側彎時吐氣",
+      "video": "https://www.youtube.com/watch?v=bQHU0sQRc5Y",
+      "video_note": "不確定有沒有用球桿",
+      "caution": "側彎只做到感覺伸展的幅度"
+    },
+    "hip_rotation": {
+      "name": "持桿髖關節轉動",
+      "new": true,
+      "cue": "一手扶著直立的球桿，單腳站；另一腳抬起，膝蓋 90°，大腿不動，小腿慢慢往外再往內轉",
+      "breath": "持續呼吸",
+      "video": "https://www.youtube.com/watch?v=Vbhxw-0YcvU",
+      "video_note": "不確定有沒有扶東西"
+    },
+    "practice_swing": {
+      "name": "空揮，由半揮到全揮",
+      "new": false,
+      "cue": "由慢到快",
+      "breath": "發力時吐氣",
+      "video": "https://www.youtube.com/watch?v=rXMphjfm3Io",
+      "video_note": "揮桿教學影片，只當半揮的參考；揮桿動作以教練為準"
+    },
+    "walking_lunge": {
+      "name": "弓箭步走",
+      "new": false,
+      "cue": "前膝對齊腳尖",
+      "breath": "",
+      "video": "https://www.youtube.com/watch?v=BenhAbJiTsw",
+      "video_note": ""
+    },
+    "side_step": {
+      "name": "側向跨步",
+      "new": false,
+      "cue": "身體不歪",
+      "breath": "",
+      "video": "https://www.youtube.com/watch?v=y7X9IsgPCgM",
+      "video_note": "影片是快速滑步；本計畫用一般側向跨步，速度慢一點也可以"
+    },
+    "pogo": {
+      "name": "原地小跳",
+      "new": false,
+      "cue": "落地輕、膝蓋對齊腳尖",
+      "breath": "",
+      "video": "https://www.youtube.com/watch?v=c2LBofIzUqs",
+      "video_note": "只跳低幅度"
+    }
+  }
+}
