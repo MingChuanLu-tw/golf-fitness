@@ -53,7 +53,7 @@ function renderHome() {
       <a class="btn big primary" href="#play/${key}">開始${esc(R.name)}熱身</a>
     </section>`;
   };
-  view().innerHTML = `<header class="top"><h1>高爾夫熱身</h1><span class="pill ${navigator.onLine ? "ok" : "warn"}">${navigator.onLine ? "有網路" : "離線：只顯示文字要點"}</span></header>
+  view().innerHTML = `<header class="top"><a class="home-back" href="../#today">‹ 健身</a><h1>高爾夫熱身</h1><span class="pill ${navigator.onLine ? "ok" : "warn"}">${navigator.onLine ? "有網路" : "離線：只顯示文字要點"}</span></header>
     ${card("sim")}${card("round")}
     <p class="note blue">${esc(W.safety.breath_rule)}。全部動作都站著做。</p>
     <a class="btn" href="#library" style="width:100%">動作庫</a>`;
@@ -187,13 +187,16 @@ async function main() {
   window.addEventListener("offline", () => (run ? ((run.shownEx = null), drawPlayer()) : route()));
   route();
   if ("serviceWorker" in navigator) {
+    // 「有新版本」只在頁面已經由熱身自己的 service worker 控制時才顯示；
+    // 從健身 app 第一次進來時，頁面還由健身 app 的 service worker 控制，那不是改版。
+    const own = () => !!navigator.serviceWorker.controller?.scriptURL.endsWith("/warmup/sw.js");
     const reg = await navigator.serviceWorker.register("sw.js");
     const show = w => { const b = $("#update"); b.hidden = false; b.onclick = () => w.postMessage("skip"); };
-    if (reg.waiting && navigator.serviceWorker.controller) show(reg.waiting);
+    if (reg.waiting && own()) show(reg.waiting);
     reg.addEventListener("updatefound", () => { const w = reg.installing;
-      w.addEventListener("statechange", () => { if (w.state === "installed" && navigator.serviceWorker.controller) show(w); }); });
+      w.addEventListener("statechange", () => { if (w.state === "installed" && own()) show(w); }); });
     // 只有按「有新版本」換版時才重新整理；第一次安裝不重新整理，避免打斷正在進行的熱身
-    let reloaded = false; const hadController = !!navigator.serviceWorker.controller?.scriptURL.endsWith("/warmup/sw.js");
+    let reloaded = false; const hadController = own();
     navigator.serviceWorker.addEventListener("controllerchange", () => { if (hadController && !reloaded) { reloaded = true; location.reload(); } });
   }
 }

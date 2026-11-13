@@ -13,6 +13,7 @@ a { color: var(--blue); }
 h1 { font-size: 24px; margin: 0; flex: 1; }
 h2 { font-size: 20px; margin: 0 0 6px; }
 .top { display: flex; align-items: center; gap: 10px; padding: 14px 0 10px; }
+.home-back { color: var(--accent); text-decoration: none; font-size: 17px; font-weight: 600; white-space: nowrap; }
 .back { font-size: 32px; text-decoration: none; line-height: 1; color: var(--text); }
 .pill { font-size: 13px; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
 .pill.ok { color: var(--accent); border-color: var(--accent); } .pill.warn { color: var(--orange); border-color: var(--orange); }

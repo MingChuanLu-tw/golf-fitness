@@ -1,5 +1,5 @@
 // 離線快取。修改任何檔案（包括 warmup.json）後，把 VERSION 加 1，裝置就會出現「有新版本」。
-const VERSION = "gw-v1";
+const VERSION = "gw-v2";
 const FILES = ["./", "index.html", "styles.css", "app.js", "warmup.json", "manifest.webmanifest",
   "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png"];
 
